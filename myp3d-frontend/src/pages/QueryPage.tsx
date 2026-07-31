@@ -243,6 +243,7 @@ export function QueryPage() {
             modestbranding: 1,
             rel: 0,
             playsinline: 1,
+            origin: window.location.origin,
           },
           events: {
             onReady: () => {
@@ -265,6 +266,10 @@ export function QueryPage() {
                 setIsSamplePlaying(false);
                 stopMonitor();
               }
+            },
+            onError: () => {
+              if (cancelled) return;
+              setPreviewError('This video cannot be embedded for preview.');
             },
           },
         });
@@ -457,7 +462,19 @@ export function QueryPage() {
               previewError ? (
                 <div className="query-empty-player">{previewError}</div>
               ) : (
-                <div className="query-player-wrap" ref={playerContainerRef}></div>
+                <div className="query-player-outer">
+                  <div className="query-player-wrap" ref={playerContainerRef}></div>
+                  {!isSamplePlaying && (
+                    <img
+                      className="query-player-thumb-overlay"
+                      src={
+                        selectedResult?.thumbnail_url ||
+                        `https://i.ytimg.com/vi/${selectedVideoId}/hqdefault.jpg`
+                      }
+                      alt=""
+                    />
+                  )}
+                </div>
               )
             ) : (
               <div className="query-empty-player">Select a result to preview it here.</div>
