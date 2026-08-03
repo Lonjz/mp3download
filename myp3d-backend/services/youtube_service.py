@@ -1,5 +1,7 @@
 from yt_dlp import YoutubeDL
 
+from services.config import get_cookies_from_browser
+
 
 def search_youtube(query: str, limit: int = 12) -> list[dict]:
     """Search YouTube videos through yt-dlp and return lightweight metadata."""
@@ -16,6 +18,10 @@ def search_youtube(query: str, limit: int = 12) -> list[dict]:
         "noplaylist": True,
         "ignoreerrors": True,
     }
+
+    cookies_from_browser = get_cookies_from_browser()
+    if cookies_from_browser:
+        ydl_opts["cookiesfrombrowser"] = cookies_from_browser
 
     with YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(search_term, download=False)
