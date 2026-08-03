@@ -426,10 +426,6 @@ def download_as_mp3(
         "noplaylist": True,
     }
 
-    cookies_from_browser = get_cookies_from_browser()
-    if cookies_from_browser:
-        ydl_opts["cookiesfrombrowser"] = cookies_from_browser
-
     if start_time is not None and end_time is not None:
         ydl_opts["download_ranges"] = download_range_func(None, [(start_time, end_time)])
         ydl_opts["force_keyframes_at_cuts"] = True
@@ -437,8 +433,18 @@ def download_as_mp3(
     if ffmpeg_path:
         ydl_opts["ffmpeg_location"] = ffmpeg_path
 
+    try:
+        with YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=True)
+    except Exception:
+        cookies_from_browser = get_cookies_from_browser()
+        if not cookies_from_browser:
+            raise
+        retry_opts = {**ydl_opts, "cookiesfrombrowser": cookies_from_browser}
+        with YoutubeDL(retry_opts) as ydl:
+            info = ydl.extract_info(url, download=True)
+
     with YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(url, download=True)
         filename = ydl.prepare_filename(info)
         mp3_file = os.path.splitext(filename)[0] + ".mp3"
         if custom_name:

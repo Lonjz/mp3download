@@ -19,12 +19,16 @@ def search_youtube(query: str, limit: int = 12) -> list[dict]:
         "ignoreerrors": True,
     }
 
-    cookies_from_browser = get_cookies_from_browser()
-    if cookies_from_browser:
-        ydl_opts["cookiesfrombrowser"] = cookies_from_browser
-
-    with YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(search_term, download=False)
+    try:
+        with YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(search_term, download=False)
+    except Exception:
+        cookies_from_browser = get_cookies_from_browser()
+        if not cookies_from_browser:
+            raise
+        retry_opts = {**ydl_opts, "cookiesfrombrowser": cookies_from_browser}
+        with YoutubeDL(retry_opts) as ydl:
+            info = ydl.extract_info(search_term, download=False)
 
     entries = info.get("entries") if isinstance(info, dict) else None
     if not entries:
