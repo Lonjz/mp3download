@@ -17,7 +17,7 @@ from yt_dlp import YoutubeDL
 from yt_dlp.utils import download_range_func
 
 from models.schemas import AlbumInfo, MP3Info
-from services.config import OUTPUT_DIR, get_cookies_from_browser, get_ffmpeg_path
+from services.config import OUTPUT_DIR, get_cookies_from_browser, get_ffmpeg_path, get_player_client_args
 
 
 CACHE_TTL_SECONDS = 120.0
@@ -425,6 +425,10 @@ def download_as_mp3(
         "quiet": True,
         "noplaylist": True,
     }
+
+    player_client_args = get_player_client_args()
+    if player_client_args:
+        ydl_opts["extractor_args"] = player_client_args
 
     if start_time is not None and end_time is not None:
         ydl_opts["download_ranges"] = download_range_func(None, [(start_time, end_time)])

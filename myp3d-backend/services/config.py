@@ -12,6 +12,7 @@ OUTPUT_DIR.mkdir(exist_ok=True)
 
 YTDLP_COOKIES_BROWSER = os.getenv("YTDLP_COOKIES_BROWSER", "firefox").strip()
 YTDLP_COOKIES_PROFILE = os.getenv("YTDLP_COOKIES_PROFILE", "").strip() or None
+YTDLP_PLAYER_CLIENTS = os.getenv("YTDLP_PLAYER_CLIENTS", "default,tv,ios").strip()
 
 
 def get_ffmpeg_path() -> str | None:
@@ -26,3 +27,11 @@ def get_cookies_from_browser() -> tuple | None:
     if not YTDLP_COOKIES_BROWSER:
         return None
     return (YTDLP_COOKIES_BROWSER, YTDLP_COOKIES_PROFILE, None, None)
+
+
+def get_player_client_args() -> dict | None:
+    """Get yt-dlp extractor_args pinning the YouTube player clients, or None if unset."""
+    clients = [c.strip() for c in YTDLP_PLAYER_CLIENTS.split(",") if c.strip()]
+    if not clients:
+        return None
+    return {"youtube": {"player_client": clients}}
